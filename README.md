@@ -11,6 +11,7 @@
 - 実装指示：docs/CODEX_HANDOFF.md
 - 検証計画：docs/VALIDATION_PLAN.md
 - Windows/QGIS 3.44 実機確認手順：docs/WINDOWS_QGIS_344_CHECK.md
+- Windows/QGIS 3.44 実機確認記録：docs/WINDOWS_QGIS_344_RESULT_TEMPLATE.md
 - データと出典：DATA_SOURCES.md
 - 完了条件・状況：docs/STATUS.md
 

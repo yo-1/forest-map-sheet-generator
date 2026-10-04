@@ -1,6 +1,6 @@
 # Windows / QGIS 3.44 実機確認手順
 
-この手順は未実行である。確認者は対象コミットとZIPのSHA256を記録する。
+この手順は未実行である。確認者は対象コミットとZIPのSHA256を記録する。記録には [結果テンプレート](WINDOWS_QGIS_344_RESULT_TEMPLATE.md) を使用する。
 
 1. 対象コミットを取得して `python scripts/build_plugin_zip.py` を実行する。`dist/forest_map_sheet_generator-0.1.0-rc1.zip` と同名 `.sha256` の値を `CertUtil -hashfile dist\forest_map_sheet_generator-0.1.0-rc1.zip SHA256` で照合する。
 2. QGIS 3.44（Windows）で「プラグインを管理とインストール」→「ZIPからインストール」を選び、上記ZIPを指定して有効化する。メニュー「森林資源メッシュ」に項目が一つだけ現れることを確認する。
