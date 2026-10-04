@@ -15,6 +15,7 @@ def validate_zone_layer(layer):
         raise ZoneLayerError("適用区域レイヤのCRSが未設定です")
     if layer.fields().indexFromName("ZONE") < 0:
         raise ZoneLayerError("適用区域レイヤに必須属性 ZONE がありません")
+    epsg_index = layer.fields().indexFromName("EPSG")
     grouped = {}
     for feature in layer.getFeatures():
         value = feature["ZONE"]
@@ -24,6 +25,13 @@ def validate_zone_layer(layer):
             raise ZoneLayerError("ZONE は整数1～19でなければなりません")
         if not 1 <= zone <= 19 or str(value).strip() not in {str(zone), f"{zone}.0"}:
             raise ZoneLayerError("ZONE は整数1～19でなければなりません")
+        if epsg_index >= 0 and feature["EPSG"] not in (None, ""):
+            try:
+                epsg = int(feature["EPSG"])
+            except (TypeError, ValueError):
+                raise ZoneLayerError(f"ZONE={zone} のEPSG属性が整数ではありません")
+            if epsg != 6668 + zone:
+                raise ZoneLayerError(f"ZONE={zone} のEPSG属性 {epsg} はEPSG:{6668 + zone} と整合しません")
         geometry = feature.geometry()
         if geometry.isNull() or geometry.isEmpty() or not geometry.isGeosValid():
             raise ZoneLayerError(f"ZONE={zone} に空または無効な形状があります")

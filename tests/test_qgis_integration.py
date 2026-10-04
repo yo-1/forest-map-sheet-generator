@@ -47,3 +47,7 @@ class QgisIntegrationTests(unittest.TestCase):
         invalid.dataProvider().addAttributes([QgsField("ZONE", QVariant.Int)]); invalid.updateFields()
         bad_feature = QgsFeature(invalid.fields()); bad_feature.setAttribute("ZONE", 20); bad_feature.setGeometry(feature.geometry()); invalid.dataProvider().addFeature(bad_feature)
         with self.assertRaises(ZoneLayerError): validate_zone_layer(invalid)
+        invalid_epsg = QgsVectorLayer("Polygon?crs=EPSG:6668", "bad-epsg", "memory")
+        invalid_epsg.dataProvider().addAttributes([QgsField("ZONE", QVariant.Int), QgsField("EPSG", QVariant.Int)]); invalid_epsg.updateFields()
+        epsg_feature = QgsFeature(invalid_epsg.fields()); epsg_feature.setAttributes([4, 6669]); epsg_feature.setGeometry(feature.geometry()); invalid_epsg.dataProvider().addFeature(epsg_feature)
+        with self.assertRaises(ZoneLayerError): validate_zone_layer(invalid_epsg)
