@@ -2,9 +2,9 @@
 
 初回実装 v0.1.0-dev。
 完了：リポジトリ作成、純Python図郭計算、独立期待値、QGISアダプタ、GeoPackage出力、試験用ZIP作成手順。
-未実施：Windows/QGIS 3.44実機検証、正式Release公開、ライセンス確定。
+未実施：Windows/QGIS 3.44実機検証、正式Release公開。
 
-残作業：Windows/QGIS 3.44実機確認、ライセンス確定後のLICENSE・配布metadata更新、必要に応じた公開。
+残作業：Windows/QGIS 3.44実機確認、必要に応じた公開。
 
 正式版の完了条件：全対象図郭の独立期待値一致、V01～V14の結果提出、Windows/QGIS動作確認、版・出典・ライセンス表示、配布ZIP確認。
 基礎ポリゴン側の報告書・原本XML確認などは別作業として管理し、このリポジトリでやり直しません。

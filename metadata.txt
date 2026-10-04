@@ -13,3 +13,4 @@ tags=forest,map,sheet,grid,JGD2011
 homepage=https://github.com/yo-1/forest-map-sheet-generator
 repository=https://github.com/yo-1/forest-map-sheet-generator
 tracker=https://github.com/yo-1/forest-map-sheet-generator/issues
+license=GPL-3.0-only

@@ -16,3 +16,9 @@
 
 系の適用区域には https://github.com/yo-1/japan-plane-rectangular-cs-zones の公開GeoPackageを使用します。
 DEM解析・20mメッシュ作成・CS立体図計算はこのプラグインの機能に含めません。
+
+## ライセンス
+
+プラグインコードは [GNU General Public License v3.0 only](LICENSE)（GPL-3.0-only）です。Copyright (C) 2026 Yoichi Wada。
+
+適用区域データなど外部データのライセンスはコードとは別です。詳細と出典は [DATA_SOURCES.md](DATA_SOURCES.md) を参照してください。
