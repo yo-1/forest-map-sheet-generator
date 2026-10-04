@@ -1,7 +1,7 @@
 # 開発仕様 v0.1.0
 
 正式名称：森林資源メッシュ用国土基本図図郭作成プラグイン。
-リポジトリ候補：yo-1/forest-map-sheet-generator（まだ作成していません）。
+リポジトリ：yo-1/forest-map-sheet-generator（作成済み）。
 
 ## 初版の対象
 
