@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+output/
+dist/
+*.zip
+*.gpkg
+*.tif
+*.laz
+*.las
+handover*.md
+private/
