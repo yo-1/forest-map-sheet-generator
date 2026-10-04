@@ -1,0 +1,11 @@
+[general]
+name=森林資源メッシュ用国土基本図図郭作成
+qgisMinimumVersion=3.40
+version=0.1.0-dev
+author=Yoichi Wada
+email=
+description=1:50,000、1:5,000、森林用4分割の国土基本図図郭をGeoPackageへ出力します。
+about=ライセンスは提案段階のため、この試験版metadataには確定表記を含めません。
+category=Vector
+experimental=True
+deprecated=False
