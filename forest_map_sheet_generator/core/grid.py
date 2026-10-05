@@ -5,14 +5,16 @@ Coordinates are always easting/northing (GIS x/y), not Japanese survey X/Y.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from math import floor
+from math import floor, isfinite
 
 from .codes import SheetCodeError, parse
 
-# GSJ's alphabet omits I and O.  The first letter increments eastward in 40 km
-# bands; the second increments northward in 30 km bands.
-ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ"
+# Forest open-data standard Ver2.1, printed p63, reference 3 figure 1.
+# First letter: north-to-south A..T (including I/O); second: west-to-east A..H.
+ROW_LETTERS = "ABCDEFGHIJKLMNOPQRST"
+COL_LETTERS = "ABCDEFGH"
 PARENT_WIDTH, PARENT_HEIGHT = 40_000, 30_000
+E_MIN, E_MAX, N_MIN, N_MAX = -160_000, 160_000, -300_000, 300_000
 EPSILON = 1e-7  # metres; only removes numerical noise at an exact boundary
 
 
@@ -49,27 +51,26 @@ def _index(value: float, size: float) -> int:
     return floor(value / size)
 
 
-def _letter(index: int) -> str:
-    if not 0 <= index < len(ALPHABET):
-        raise SheetCodeError("投影座標が国土基本図図郭コードの英字範囲外です")
-    return ALPHABET[index]
-
-
 def parent_from_point(zone: int, easting: float, northing: float) -> Sheet:
     if not 1 <= int(zone) <= 19:
         raise SheetCodeError("系番号は1～19です")
-    column, row = _index(easting, PARENT_WIDTH), _index(northing, PARENT_HEIGHT)
-    code = f"{int(zone):02d}{_letter(column)}{_letter(row)}"
-    return Sheet(code, int(zone), "50000", code, column * PARENT_WIDTH,
-                 (column + 1) * PARENT_WIDTH, row * PARENT_HEIGHT, (row + 1) * PARENT_HEIGHT)
+    if not isfinite(easting) or not isfinite(northing):
+        raise SheetCodeError("座標は有限値で指定してください")
+    column = _index(easting - E_MIN, PARENT_WIDTH)
+    row = len(ROW_LETTERS) - 1 - _index(northing - N_MIN, PARENT_HEIGHT)
+    if not 0 <= column < len(COL_LETTERS) or not 0 <= row < len(ROW_LETTERS):
+        raise SheetCodeError("座標は原典図郭範囲（東距±160km、北距±300km）の外です")
+    return sheet_from_code(f"{int(zone):02d}{ROW_LETTERS[row]}{COL_LETTERS[column]}")
 
 
 def sheet_from_code(code: str) -> Sheet:
     item = parse(code)
-    column, row = ALPHABET.index(item["col_letter"]), ALPHABET.index(item["row_letter"])
-    parent_code = f"{item['zone']:02d}{item['col_letter']}{item['row_letter']}"
-    parent = Sheet(parent_code, item["zone"], "50000", parent_code, column * PARENT_WIDTH,
-                   (column + 1) * PARENT_WIDTH, row * PARENT_HEIGHT, (row + 1) * PARENT_HEIGHT)
+    column, row = COL_LETTERS.index(item["col_letter"]), ROW_LETTERS.index(item["row_letter"])
+    parent_code = f"{item['zone']:02d}{item['row_letter']}{item['col_letter']}"
+    e_min = E_MIN + column * PARENT_WIDTH
+    n_max = N_MAX - row * PARENT_HEIGHT
+    parent = Sheet(parent_code, item["zone"], "50000", parent_code, e_min,
+                   e_min + PARENT_WIDTH, n_max - PARENT_HEIGHT, n_max)
     if item["grid_type"] == "50000":
         return parent
     if item["grid_type"] == "5000":
@@ -100,15 +101,25 @@ def children(parent_code: str, grid_type: str) -> list[Sheet]:
 
 def sheets_covering_bbox(zone: int, e_min: float, n_min: float, e_max: float, n_max: float, grid_type: str) -> list[Sheet]:
     """Return sheets having positive-area overlap with the half-open bbox."""
+    if grid_type not in ("50000", "5000", "forest_quarter"):
+        raise SheetCodeError("図郭種別は50000、5000、forest_quarterです")
+    if not 1 <= int(zone) <= 19:
+        raise SheetCodeError("系番号は1～19です")
+    if not all(isfinite(v) for v in (e_min, n_min, e_max, n_max)):
+        raise SheetCodeError("範囲の座標は有限値で指定してください")
     if e_max <= e_min or n_max <= n_min:
         return []
-    start = parent_from_point(zone, e_min, n_min)
-    # max edge is excluded: a sheet only touching it is not selected.
-    end = parent_from_point(zone, e_max - EPSILON, n_max - EPSILON)
-    parents = [sheet_from_code(f"{zone:02d}{_letter(c)}{_letter(r)}")
-               for c in range(_index(start.e_min, PARENT_WIDTH), _index(end.e_min, PARENT_WIDTH) + 1)
-               for r in range(_index(start.n_min, PARENT_HEIGHT), _index(end.n_min, PARENT_HEIGHT) + 1)]
+    if e_min < E_MIN or e_max > E_MAX or n_min < N_MIN or n_max > N_MAX:
+        raise SheetCodeError("指定範囲が原典図郭範囲の外へ延びています。範囲を確認してください")
+    # Scan the finite 160 parents, without subtracting epsilon from max edges.
+    # Thus even a positive overlap narrower than EPSILON is retained.
+    parents = []
+    for r in ROW_LETTERS:
+        for c in COL_LETTERS:
+            parent = sheet_from_code(f"{int(zone):02d}{r}{c}")
+            if parent.e_min < e_max and parent.e_max > e_min and parent.n_min < n_max and parent.n_max > n_min:
+                parents.append(parent)
     candidates = parents if grid_type == "50000" else [child for parent in parents for child in children(parent.sheet_code, grid_type)]
     # Bbox-only callers require the same positive-area rule as QGIS callers.
-    return [sheet for sheet in candidates if sheet.e_min < e_max - EPSILON and sheet.e_max > e_min + EPSILON
-            and sheet.n_min < n_max - EPSILON and sheet.n_max > n_min + EPSILON]
+    return [sheet for sheet in candidates if sheet.e_min < e_max and sheet.e_max > e_min
+            and sheet.n_min < n_max and sheet.n_max > n_min]

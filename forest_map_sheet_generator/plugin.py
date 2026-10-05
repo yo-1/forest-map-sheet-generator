@@ -51,6 +51,6 @@ class ForestMapSheetGeneratorPlugin:
             groups, method = self._generate(dialog); groups = {z: list({s.sheet_code: s for s in sheets}.values()) for z, sheets in groups.items() if sheets}; count = sum(map(len, groups.values()))
             if not count: raise ValueError("正の面積で重なる図郭がありません")
             if QMessageBox.question(dialog, "生成件数の確認", f"{count}件を生成します。続行しますか？") != QMessageBox.Yes: return
-            names = [write_sheets(dialog.output.filePath(), z, dialog.grid_type.currentData(), sheets, "0.1.0-dev", method=method) for z, sheets in groups.items()]
+            names = [write_sheets(dialog.output.filePath(), z, dialog.grid_type.currentData(), sheets, "0.1.0-rc2", method=method) for z, sheets in groups.items()]
             QMessageBox.information(dialog, "完了", f"{count}件を出力しました: {', '.join(names)}")
         except (ValueError, ZoneLayerError, RuntimeError, FileExistsError) as error: QMessageBox.warning(dialog, "生成できません", str(error))

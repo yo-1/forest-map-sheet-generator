@@ -30,7 +30,7 @@ class QgisIntegrationTests(unittest.TestCase):
             self.assertEqual(layer.featureCount(), 1)
             feature = next(layer.getFeatures())
             self.assertEqual(feature["sheet_code"], "04HE")
-            self.assertEqual((feature["e_min"], feature["e_max"], feature["n_min"], feature["n_max"]), (280000.0, 320000.0, 120000.0, 150000.0))
+            self.assertEqual((feature["e_min"], feature["e_max"], feature["n_min"], feature["n_max"]), (0.0, 40000.0, 60000.0, 90000.0))
             with self.assertRaises(FileExistsError): write_sheets(path, 4, "50000", [sheet_from_code("04HE")], "0.1.0-dev")
 
     def test_zone_validation_and_positive_area_selection(self):
