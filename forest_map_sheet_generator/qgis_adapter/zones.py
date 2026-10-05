@@ -49,3 +49,17 @@ def automatic_zones(target_geometry, zone_geometries):
         if not intersection.isEmpty() and intersection.area() > 0:
             selected[zone] = intersection
     return selected
+
+
+def coverage_warnings(target_geometry, zone_geometries):
+    """Report incomplete zone data and target area not assigned to any zone."""
+    warnings = []
+    missing = sorted(set(range(1, 20)) - set(zone_geometries))
+    if missing:
+        warnings.append("適用区域レイヤに含まれない系: " + ", ".join(map(str, missing)))
+    union = QgsGeometry.unaryUnion(list(zone_geometries.values()))
+    uncovered = target_geometry.difference(union)
+    # A relative tolerance suppresses numerical slivers in the source CRS.
+    if not uncovered.isEmpty() and uncovered.area() > max(1e-12, target_geometry.area() * 1e-10):
+        warnings.append("対象範囲に適用区域で覆われない部分があります。系を自動割当しません")
+    return warnings
