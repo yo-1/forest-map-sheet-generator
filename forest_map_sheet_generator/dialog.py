@@ -28,7 +28,7 @@ class GeneratorDialog(QDialog):
         layout.addRow(self.zone_stack)
         self.zone_data_version = QLineEdit(); self.zone_data_version.setPlaceholderText("例: v2026.1（不明なら空欄）"); layout.addRow("適用区域データ版", self.zone_data_version)
         self.output = QgsFileWidget(); self.output.setFilter("GeoPackage (*.gpkg)"); self.output.setStorageMode(QgsFileWidget.SaveFile); layout.addRow("出力GeoPackage", self.output)
-        layout.addRow(QLabel("生成中は取消できます。書込開始後は取消できません。既存の同名レイヤは上書きしません。"))
+        layout.addRow(QLabel("計算中・書込み中に取消できます。既存の同名レイヤは上書きしません。"))
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel); buttons.accepted.connect(self.accept); buttons.rejected.connect(self.reject); layout.addRow(buttons)
     def _method_changed(self, index): self.target_stack.setCurrentIndex(index)
     def _zone_changed(self, index): self.zone_stack.setCurrentIndex(index)
