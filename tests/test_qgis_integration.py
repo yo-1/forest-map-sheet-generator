@@ -1,5 +1,6 @@
 """Run with QGIS Python. A skipped test is not a successful integration run."""
 import os
+from pathlib import Path
 import sqlite3
 import tempfile
 import unittest
@@ -14,7 +15,7 @@ except ImportError as error:
 
 from forest_map_sheet_generator.core.grid import sheet_from_code
 from forest_map_sheet_generator.qgis_adapter.generator import GenerationCancelled, generate_for_geometry, transformed_geometry
-from forest_map_sheet_generator.qgis_adapter.writer import write_sheets
+from forest_map_sheet_generator.qgis_adapter.writer import write_sheets, write_sheets_batch
 from forest_map_sheet_generator.qgis_adapter.zones import ZoneLayerError, automatic_zones, coverage_warnings, validate_zone_layer
 
 
@@ -92,3 +93,35 @@ class QgisIntegrationTests(unittest.TestCase):
         target = QgsGeometry.fromWkt("POLYGON((1 60001,2 60001,2 60002,1 60002,1 60001))")
         with self.assertRaises(GenerationCancelled):
             generate_for_geometry(target, dst, 4, "50000", cancel=lambda: True)
+
+    def test_batch_cancel_and_failure_preserve_existing_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, "grid.gpkg")
+            write_sheets(path, 4, "50000", [sheet_from_code("04HE")], "0.1.0-dev")
+            before = Path(path).read_bytes()
+            # Cancel during the second zone, after the first has been written to staging.
+            checks = iter([False, False, False, True])
+            groups = {5: [sheet_from_code("05HE")], 6: [sheet_from_code("06HE")]}
+            with self.assertRaises(GenerationCancelled):
+                write_sheets_batch(path, groups, "50000", "0.1.0-dev", cancel=lambda: next(checks))
+            self.assertEqual(Path(path).read_bytes(), before)
+            self.assertFalse(any(name.startswith(".forest_grid_") for name in os.listdir(directory)))
+            with self.assertRaises(FileExistsError):
+                write_sheets_batch(path, {5: groups[5], 4: [sheet_from_code("04HE")]},
+                                   "50000", "0.1.0-dev")
+            self.assertEqual(Path(path).read_bytes(), before)
+            self.assertEqual(write_sheets_batch(path, groups, "50000", "0.1.0-dev"),
+                             ["grid_z05_50000", "grid_z06_50000"])
+            with sqlite3.connect(path) as db:
+                names = {row[0] for row in db.execute("SELECT table_name FROM gpkg_contents")}
+                self.assertTrue({"grid_z04_50000", "grid_z05_50000", "grid_z06_50000"} <= names)
+                self.assertEqual(db.execute("SELECT COUNT(*) FROM forest_map_sheet_provenance").fetchone()[0], 3)
+
+    def test_batch_cancel_new_file_leaves_no_output(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, "new.gpkg")
+            with self.assertRaises(GenerationCancelled):
+                write_sheets_batch(path, {4: [sheet_from_code("04HE")]}, "50000", "0.1.0-dev",
+                                   cancel=lambda: True)
+            self.assertFalse(os.path.exists(path))
+            self.assertEqual(os.listdir(directory), [])
