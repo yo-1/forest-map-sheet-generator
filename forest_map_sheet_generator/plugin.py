@@ -8,7 +8,7 @@ from qgis.core import QgsGeometry
 from .core.grid import sheet_from_code
 from .dialog import GeneratorDialog
 from .qgis_adapter.generator import GenerationCancelled, generate_for_geometry, transformed_geometry
-from .qgis_adapter.writer import layer_name, write_sheets
+from .qgis_adapter.writer import layer_name, write_sheets_batch
 from .qgis_adapter.zones import ZoneLayerError, automatic_zones, coverage_warnings, validate_zone_layer
 
 try:
@@ -94,7 +94,6 @@ class ForestMapSheetGeneratorPlugin:
         if not dialog.exec_():
             return
         progress = None
-        writing = False
         try:
             path = dialog.output.filePath().strip()
             if not path:
@@ -123,21 +122,26 @@ class ForestMapSheetGeneratorPlugin:
                 duplicate = present.intersection(layer_name(z, dialog.grid_type.currentData()) for z in groups)
                 if duplicate:
                     raise FileExistsError("既存レイヤは上書きしません: " + ", ".join(sorted(duplicate)))
-            summary = f"{count}件を生成します。書込開始後は取消できません。続行しますか？"
+            summary = f"{count}件を生成します。書込み中も取消できます。続行しますか？"
             if warnings:
                 summary += "\n\n注意:\n" + "\n".join(warnings)
             if QMessageBox.question(dialog, "生成件数の確認", summary) != QMessageBox.Yes:
                 return
             version = dialog.zone_data_version.text().strip() if method == "automatic" else "unknown"
-            writing = True
-            names = [write_sheets(path, z, dialog.grid_type.currentData(), sheets, "0.1.0-rc2", commit=COMMIT,
-                                  method=method, zone_data_version=version or "unknown") for z, sheets in groups.items()]
+            progress = QProgressDialog("作業用GeoPackageに書込み中（取消できます）", "取消", 0, 0, self.iface.mainWindow())
+            progress.setWindowModality(Qt.WindowModal)
+            progress.setMinimumDuration(0)
+            progress.show()
+            names = write_sheets_batch(path, groups, dialog.grid_type.currentData(), "0.1.0-rc2",
+                                       commit=COMMIT, method=method, zone_data_version=version or "unknown",
+                                       cancel=cancelled)
+            progress.close()
+            progress = None
             QMessageBox.information(dialog, "完了", f"{count}件を出力しました: {', '.join(names)}")
         except GenerationCancelled as error:
             QMessageBox.information(dialog, "取消", str(error))
         except (ValueError, ZoneLayerError, RuntimeError, FileExistsError, sqlite3.Error) as error:
-            suffix = "\n書込途中で失敗したため、出力GeoPackageに一部のレイヤが残っていないか確認してください" if writing else ""
-            QMessageBox.warning(dialog, "生成できません", str(error) + suffix)
+            QMessageBox.warning(dialog, "生成できません", str(error))
         finally:
             if progress is not None:
                 progress.close()
