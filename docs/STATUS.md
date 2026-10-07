@@ -1,12 +1,12 @@
 # 状況・完了条件
 
-確認日: 2026-10-08。開発中の正本は [PR #1](https://github.com/yo-1/forest-map-sheet-generator/pull/1) の `codex/initial-plugin-implementation` ブランチで、確認時の先端は `87286f4de6f12a44b2d8e452f880d6ecce862221`。PRはopen・未マージ、正式Releaseは未実施。mainの準備段階の記述を現在の開発状態と混同しない。
+確認日: 2026-10-08。開発中の正本は [PR #1](https://github.com/yo-1/forest-map-sheet-generator/pull/1) の `codex/initial-plugin-implementation` ブランチ。PRはopen・未マージ、正式Releaseは未実施。mainの準備段階の記述を現在の開発状態と混同しない。
 
 ## 確認済み
 
 - 国土基本図コードの軸順・原点オフセット・英字範囲・負座標を原典に合わせて修正した。旧 `a0074378` の期待値と試験ZIPは修正版の合格証拠・実機確認には使わない。
 - PR本文に、固定座標期待値11件、純Python図郭試験7件、地域メッシュ試験2件、Linux/QGIS結合試験5件の成功が記録されている。これはWindows実機の合格を意味しない。
-- PR先端 `87286f4` の [GitHub Actions](https://github.com/yo-1/forest-map-sheet-generator/actions/runs/37348858381) は成功。
+- 検証対象コミット `87286f4de6f12a44b2d8e452f880d6ecce862221` の [GitHub Actions](https://github.com/yo-1/forest-map-sheet-generator/actions/runs/37348858381) は成功。以降の文書更新コミットのCI結果には読み替えない。
 - 適用区域の未被覆判定 `coverage_warnings` は入力形状と同じCRSで面積を計算し、未被覆面積が `max(1e-12, 対象面積 × 1e-10)` を超えたとき警告する。相対閾値には絶対下限 `1e-12` もあるため、地理座標系の小範囲で常に相対 `1e-10` が効くとはいえない。
 
 ## 未確認・残作業
