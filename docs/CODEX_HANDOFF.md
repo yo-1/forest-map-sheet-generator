@@ -4,12 +4,12 @@
 
 ## 対象と変更範囲
 
-新規リポジトリ候補：yo-1/forest-map-sheet-generator。
+対象リポジトリ：yo-1/forest-map-sheet-generator（作成済み）。
 既存のcsmap-sheets、fme-csmap-pipeline、forest-mesh20m、japan-plane-rectangular-cs-zonesは変更しません。
 基礎ポリゴンの系区分ルールや告示照合は再実施せず、公開資料を参照します。
 SPEC.mdとVALIDATION_PLAN.mdに従うQGISプラグインを実装します。
 
-## 推奨ファイル構成（これから作成）
+## 初回実装のファイル構成
 
 forest_map_sheet_generator/__init__.py：QGIS classFactory。
 plugin.py：起動・終了、メニュー管理。

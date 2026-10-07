@@ -7,6 +7,6 @@
 - 出典表記：https://github.com/yo-1/japan-plane-rectangular-cs-zones/blob/main/DATA_LICENSE.md
 
 適用区域データはCC BY 4.0。利用・加工時は上記の最新DATA_LICENSE.mdに基づき出典と加工内容を示します。
-プラグインコードのライセンスと外部データのライセンスを分けて表示します。
+プラグインコードはGPL-3.0-onlyであり、外部データのライセンスとは分けて表示します。
 公開ZIPには基礎ポリゴンやユーザー提供PDFを同梱せず、出典への参照を置きます。
 公的機関による公式プラグインとの表示をしません。
