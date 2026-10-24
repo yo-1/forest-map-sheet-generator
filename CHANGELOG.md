@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 未リリース
+- tests/test_metadata.py を追加し CI で実行。metadata.txt の必須項目（description など）の欠落、BOM、バージョン表記のずれを検出する（rc4 で直した起動時読み込み不具合の再発防止）。
+
 ## v0.1.0-rc4
 - metadata.txt に必須項目 description を追加。欠けていたため、QGIS 起動時に「メタデータを読み込み中にエラー」となり、再起動後に自動で読み込まれなかった。
 
