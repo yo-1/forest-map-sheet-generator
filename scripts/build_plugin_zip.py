@@ -8,7 +8,7 @@ import subprocess
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "dist" / "forest_map_sheet_generator-0.1.0-rc3.zip"
+OUT = ROOT / "dist" / "forest_map_sheet_generator-0.1.0-rc4.zip"
 PLUGIN_DIR = "forest_map_sheet_generator"
 ROOT_FILES = ("metadata.txt", "LICENSE", "README.md", "DATA_SOURCES.md")
 

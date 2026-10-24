@@ -1,7 +1,8 @@
 [general]
 name=森林資源メッシュ用国土基本図図郭作成
 qgisMinimumVersion=3.40
-version=0.1.0-rc3
+description=JGD2011の平面直角座標系で国土基本図の図郭を生成します
+version=0.1.0-rc4
 author=Yoichi Wada
 email=
 about=JGD2011の平面直角座標系で国土基本図図郭を生成します。
