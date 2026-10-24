@@ -30,5 +30,13 @@ class GeneratorDialog(QDialog):
         self.output = QgsFileWidget(); self.output.setFilter("GeoPackage (*.gpkg)"); self.output.setStorageMode(QgsFileWidget.SaveFile); layout.addRow("出力GeoPackage", self.output)
         layout.addRow(QLabel("計算中・書込み中に取消できます。既存の同名レイヤは上書きしません。"))
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel); buttons.accepted.connect(self.accept); buttons.rejected.connect(self.reject); layout.addRow(buttons)
+        # 実機検証・UIテストが各入力を特定できるよう objectName を付与する（挙動は変えない）
+        for name, widget in (
+            ("forestMapSheetGeneratorDialog", self), ("targetMethodCombo", self.method), ("targetStack", self.target_stack),
+            ("mapCodeEdit", self.code), ("targetLayerCombo", self.target_layer), ("gridTypeCombo", self.grid_type),
+            ("zoneModeCombo", self.zone_mode), ("zoneStack", self.zone_stack), ("manualZonesEdit", self.manual_zones),
+            ("zoneLayerCombo", self.zone_layer), ("zoneDataVersionEdit", self.zone_data_version), ("outputGpkgFile", self.output),
+            ("buttonBox", buttons),
+        ): widget.setObjectName(name)
     def _method_changed(self, index): self.target_stack.setCurrentIndex(index)
     def _zone_changed(self, index): self.zone_stack.setCurrentIndex(index)
