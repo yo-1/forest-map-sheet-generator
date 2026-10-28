@@ -1,0 +1,12 @@
+id,source,calculation,code,grid_type,e_min,e_max,n_min,n_max
+V01,Forest standard Ver2.1 printed p63 fig1,H row7 E col4,04HE,50000,0,40000,60000,90000
+V02,Forest standard Ver2.1 printed p64,HE northwest child,04HE00,5000,0,4000,87000,90000
+V02b,Forest standard Ver2.1 printed p64,HE southeast child,04HE99,5000,36000,40000,60000,63000
+V03a,Forest standard Ver2.1 printed p7 fig1.4,northwest,04HE1,forest_quarter,0,20000,75000,90000
+V03b,Forest standard Ver2.1 printed p7 fig1.4,northeast,04HE2,forest_quarter,20000,40000,75000,90000
+V03c,Forest standard Ver2.1 printed p7 fig1.4,southwest,04HE3,forest_quarter,0,20000,60000,75000
+V03d,Forest standard Ver2.1 printed p7 fig1.4,southeast,04HE4,forest_quarter,20000,40000,60000,75000
+V01b,Forest standard Ver2.1 printed p63 fig1,L row11 D col3,09LD,50000,-40000,0,-60000,-30000
+V02c,Forest standard Ver2.1 printed p64,row3 col5,09LD35,5000,-20000,-16000,-42000,-39000
+V01c,Forest standard Ver2.1 printed p63 fig1,I row8 E col4,09IE,50000,0,40000,30000,60000
+V01d,Forest standard Ver2.1 printed p63 fig1,O row14 E col4,09OE,50000,0,40000,-150000,-120000
