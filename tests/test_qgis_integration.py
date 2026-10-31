@@ -4,6 +4,7 @@ from pathlib import Path
 import sqlite3
 import tempfile
 import unittest
+from unittest import mock
 import zipfile
 
 try:
@@ -15,6 +16,7 @@ except ImportError as error:
 
 from forest_map_sheet_generator.core.grid import sheet_from_code
 from forest_map_sheet_generator.qgis_adapter.generator import GenerationCancelled, generate_for_geometry, transformed_geometry
+from forest_map_sheet_generator.qgis_adapter import writer as writer_module
 from forest_map_sheet_generator.qgis_adapter.writer import write_sheets, write_sheets_batch
 from forest_map_sheet_generator.qgis_adapter.zones import ZoneLayerError, automatic_zones, coverage_warnings, validate_zone_layer
 
@@ -125,3 +127,39 @@ class QgisIntegrationTests(unittest.TestCase):
                                    cancel=lambda: True)
             self.assertFalse(os.path.exists(path))
             self.assertEqual(os.listdir(directory), [])
+
+    def test_batch_publish_retries_replace_then_succeeds(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, "grid.gpkg")
+            write_sheets(path, 4, "50000", [sheet_from_code("04HE")], "0.1.0-dev")
+            real_replace = os.replace
+            attempts = []
+
+            def flaky_replace(src, dst):
+                attempts.append(1)
+                if len(attempts) <= 2:
+                    raise PermissionError(5, "Access is denied")
+                return real_replace(src, dst)
+
+            with mock.patch.object(writer_module, "_REPLACE_DELAY_SECONDS", 0), \
+                    mock.patch("os.replace", side_effect=flaky_replace):
+                names = write_sheets_batch(path, {5: [sheet_from_code("05HE")]}, "50000", "0.1.0-dev")
+            self.assertEqual(names, ["grid_z05_50000"])
+            self.assertEqual(len(attempts), 3)
+            with sqlite3.connect(path) as db:
+                tables = {row[0] for row in db.execute("SELECT table_name FROM gpkg_contents")}
+            self.assertTrue({"grid_z04_50000", "grid_z05_50000"} <= tables)
+
+    def test_batch_publish_persistent_lock_raises_guidance_and_preserves_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, "grid.gpkg")
+            write_sheets(path, 4, "50000", [sheet_from_code("04HE")], "0.1.0-dev")
+            before = Path(path).read_bytes()
+            with mock.patch.object(writer_module, "_REPLACE_ATTEMPTS", 3), \
+                    mock.patch.object(writer_module, "_REPLACE_DELAY_SECONDS", 0), \
+                    mock.patch("os.replace", side_effect=PermissionError(5, "Access is denied")):
+                with self.assertRaises(RuntimeError) as raised:
+                    write_sheets_batch(path, {5: [sheet_from_code("05HE")]}, "50000", "0.1.0-dev")
+            self.assertIn("再試行", str(raised.exception))
+            self.assertEqual(Path(path).read_bytes(), before)
+            self.assertFalse(any(name.startswith(".forest_grid_") for name in os.listdir(directory)))

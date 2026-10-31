@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from contextlib import closing
+import gc
 import os
 import sqlite3
 import tempfile
+import time
 
 from qgis.core import QgsCoordinateReferenceSystem, QgsFeature, QgsField, QgsFields, QgsProject, QgsVectorFileWriter, QgsWkbTypes
 from qgis.PyQt.QtCore import QVariant
@@ -64,6 +66,37 @@ def write_sheets(path, zone, grid_type, sheets, plugin_version, commit="unknown"
     return name
 
 
+_REPLACE_ATTEMPTS = 10
+_REPLACE_DELAY_SECONDS = 0.5
+
+
+def _publish(staging, path):
+    """Move the finished staging file onto the destination path.
+
+    On Windows, os.replace() is denied while any process still holds the
+    destination open (another application, a sync client, an antivirus
+    scan, or a handle this process has not released yet). Flush Python
+    and GDAL handles first, retry briefly to ride out transient locks,
+    and otherwise raise a RuntimeError that tells the user what to do
+    instead of surfacing a bare PermissionError.
+    """
+    gc.collect()
+    last_error = None
+    for _ in range(_REPLACE_ATTEMPTS):
+        try:
+            os.replace(staging, path)
+            return
+        except PermissionError as error:
+            last_error = error
+            time.sleep(_REPLACE_DELAY_SECONDS)
+    raise RuntimeError(
+        "出力先GeoPackageを更新できませんでした。ファイルが他のアプリや"
+        "QGISのレイヤとして開かれていないか確認し、同期やウイルス対策の"
+        "処理が終わるのを待ってから再試行してください"
+        f"（出力先: {path}）"
+    ) from last_error
+
+
 def write_sheets_batch(path, groups, grid_type, plugin_version, commit="unknown", method="unknown",
                        zone_data_version="unknown", cancel=None):
     """Publish all layers together; cancellation/failure leaves the destination unchanged."""
@@ -87,7 +120,7 @@ def write_sheets_batch(path, groups, grid_type, plugin_version, commit="unknown"
         if cancel and cancel():
             from .generator import GenerationCancelled
             raise GenerationCancelled("書込みを取り消しました。出力は変更していません")
-        os.replace(staging, path)
+        _publish(staging, path)
         return names
     finally:
         for suffix in ("", "-wal", "-shm", "-journal"):
