@@ -1,3 +1,4 @@
+from contextlib import closing
 import os
 import sqlite3
 
@@ -117,7 +118,12 @@ class ForestMapSheetGeneratorPlugin:
             if not count:
                 raise ValueError("正の面積で重なる図郭がありません")
             if os.path.exists(path):
-                with sqlite3.connect(path) as connection:
+                # sqlite3 connection context managers only end the
+                # transaction; they do not close the connection. Leaving
+                # this connection open makes the later os.replace() in
+                # write_sheets_batch fail on Windows (WinError 5), because
+                # this plugin itself still holds the destination file.
+                with closing(sqlite3.connect(path)) as connection:
                     present = {row[0] for row in connection.execute("SELECT table_name FROM gpkg_contents")}
                 duplicate = present.intersection(layer_name(z, dialog.grid_type.currentData()) for z in groups)
                 if duplicate:
@@ -140,6 +146,9 @@ class ForestMapSheetGeneratorPlugin:
             QMessageBox.information(dialog, "完了", f"{count}件を出力しました: {', '.join(names)}")
         except GenerationCancelled as error:
             QMessageBox.information(dialog, "取消", str(error))
+        except PermissionError:
+            QMessageBox.warning(dialog, "生成できません",
+                                "出力先GeoPackageへアクセスできませんでした。ファイルが他のアプリで開かれていないか、出力フォルダへの書込み権限があるか確認して、もう一度実行してください")
         except (ValueError, ZoneLayerError, RuntimeError, FileExistsError, sqlite3.Error) as error:
             QMessageBox.warning(dialog, "生成できません", str(error))
         finally:
