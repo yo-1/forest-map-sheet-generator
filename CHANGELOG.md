@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.0 — 2026-11-05
+- 初回の正式版。Windows 11 / QGIS 3.44 での実機確認（初回確認・再試験・修正検証）を完了して公開。
+- 既存 GeoPackage へ別系レイヤを追加すると `PermissionError [WinError 5]` になる不具合を修正（Issue #3、PR #6）。原因は、出力先の重複チェックで開いた sqlite 接続を閉じないまま `os.replace()` していたこと。
+
 ## 未リリース
 - tests/test_metadata.py を追加し CI で実行。metadata.txt の必須項目（description など）の欠落、BOM、バージョン表記のずれを検出する（rc4 で直した起動時読み込み不具合の再発防止）。
 
