@@ -29,7 +29,13 @@ class GeneratorDialog(QDialog):
         self.zone_data_version = QLineEdit(); self.zone_data_version.setPlaceholderText("例: v2026.1（不明なら空欄）"); layout.addRow("適用区域データ版", self.zone_data_version)
         self.output = QgsFileWidget(); self.output.setFilter("GeoPackage (*.gpkg)"); self.output.setStorageMode(QgsFileWidget.SaveFile); layout.addRow("出力GeoPackage", self.output)
         layout.addRow(QLabel("計算中・書込み中に取消できます。既存の同名レイヤは上書きしません。"))
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel); buttons.accepted.connect(self.accept); buttons.rejected.connect(self.reject); layout.addRow(buttons)
+        try:
+            _ok = QDialogButtonBox.StandardButton.Ok  # Qt6 scoped enum
+            _cancel = QDialogButtonBox.StandardButton.Cancel
+        except AttributeError:  # Qt5
+            _ok = QDialogButtonBox.Ok
+            _cancel = QDialogButtonBox.Cancel
+        buttons = QDialogButtonBox(_ok | _cancel); buttons.accepted.connect(self.accept); buttons.rejected.connect(self.reject); layout.addRow(buttons)
         # 実機検証・UIテストが各入力を特定できるよう objectName を付与する（挙動は変えない）
         for name, widget in (
             ("forestMapSheetGeneratorDialog", self), ("targetMethodCombo", self.method), ("targetStack", self.target_stack),

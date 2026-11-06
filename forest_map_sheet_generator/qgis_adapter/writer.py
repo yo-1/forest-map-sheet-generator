@@ -9,7 +9,18 @@ import tempfile
 import time
 
 from qgis.core import QgsCoordinateReferenceSystem, QgsFeature, QgsField, QgsFields, QgsProject, QgsVectorFileWriter, QgsWkbTypes
-from qgis.PyQt.QtCore import QVariant
+try:
+    from qgis.PyQt.QtCore import QMetaType
+
+    _FIELD_STRING = QMetaType.QString  # Qt6: QVariant.Type was removed
+    _FIELD_INT = QMetaType.Int
+    _FIELD_DOUBLE = QMetaType.Double
+except Exception:  # Qt5 fallback
+    from qgis.PyQt.QtCore import QVariant
+
+    _FIELD_STRING = QVariant.String
+    _FIELD_INT = QVariant.Int
+    _FIELD_DOUBLE = QVariant.Double
 
 
 def layer_name(zone: int, grid_type: str) -> str:
@@ -29,11 +40,11 @@ def write_sheets(path, zone, grid_type, sheets, plugin_version, commit="unknown"
             existing.close()
     fields = QgsFields()
     for field in ("sheet_code", "grid_type", "parent_code"):
-        fields.append(QgsField(field, QVariant.String))
-    fields.append(QgsField("zone", QVariant.Int))
-    fields.append(QgsField("epsg", QVariant.Int))
+        fields.append(QgsField(field, _FIELD_STRING))
+    fields.append(QgsField("zone", _FIELD_INT))
+    fields.append(QgsField("epsg", _FIELD_INT))
     for field in ("e_min", "e_max", "n_min", "n_max"):
-        fields.append(QgsField(field, QVariant.Double))
+        fields.append(QgsField(field, _FIELD_DOUBLE))
     epsg = 6668 + zone
     options = QgsVectorFileWriter.SaveVectorOptions()
     options.driverName = "GPKG"
