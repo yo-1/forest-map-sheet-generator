@@ -9,13 +9,19 @@ import tempfile
 import time
 
 from qgis.core import QgsCoordinateReferenceSystem, QgsFeature, QgsField, QgsFields, QgsProject, QgsVectorFileWriter, QgsWkbTypes
-try:
+from qgis.PyQt.QtCore import qVersion
+
+if qVersion().startswith("6"):
+    # Qt6: QVariant.Type was removed; QgsField takes QMetaType.Type.
     from qgis.PyQt.QtCore import QMetaType
 
-    _FIELD_STRING = QMetaType.QString  # Qt6: QVariant.Type was removed
-    _FIELD_INT = QMetaType.Int
-    _FIELD_DOUBLE = QMetaType.Double
-except Exception:  # Qt5 fallback
+    _T = getattr(QMetaType, "Type", QMetaType)  # scoped enum on PyQt6
+    _FIELD_STRING = _T.QString
+    _FIELD_INT = _T.Int
+    _FIELD_DOUBLE = _T.Double
+else:
+    # Qt5: QgsField strictly requires QVariant.Type (a QMetaType value is
+    # rejected by the sip bindings, e.g. on Ubuntu's QGIS 3.34).
     from qgis.PyQt.QtCore import QVariant
 
     _FIELD_STRING = QVariant.String
