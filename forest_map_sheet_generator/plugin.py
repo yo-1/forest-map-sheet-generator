@@ -3,17 +3,8 @@ import os
 import sqlite3
 
 from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtGui import QAction
 from qgis.PyQt.QtWidgets import QApplication, QMessageBox, QProgressDialog
-
-try:
-    from qgis.PyQt.QtGui import QAction  # Qt6
-except ImportError:  # Qt5
-    from qgis.PyQt.QtWidgets import QAction
-
-try:
-    _WINDOW_MODAL = Qt.WindowModality.WindowModal  # Qt6 scoped enum
-except AttributeError:  # Qt5
-    _WINDOW_MODAL = Qt.WindowModal
 from qgis.core import QgsGeometry
 
 from .core.grid import sheet_from_code
@@ -110,7 +101,7 @@ class ForestMapSheetGeneratorPlugin:
             if not path:
                 raise ValueError("出力GeoPackageを指定してください")
             progress = QProgressDialog("図郭候補を計算中（取消できます）", "取消", 0, 0, self.iface.mainWindow())
-            progress.setWindowModality(_WINDOW_MODAL)
+            progress.setWindowModality(Qt.WindowModality.WindowModal)
             progress.setMinimumDuration(0)
             progress.show()
 
@@ -141,11 +132,11 @@ class ForestMapSheetGeneratorPlugin:
             summary = f"{count}件を生成します。書込み中も取消できます。続行しますか？"
             if warnings:
                 summary += "\n\n注意:\n" + "\n".join(warnings)
-            if QMessageBox.question(dialog, "生成件数の確認", summary) != QMessageBox.Yes:
+            if QMessageBox.question(dialog, "生成件数の確認", summary) != QMessageBox.StandardButton.Yes:
                 return
             version = dialog.zone_data_version.text().strip() if method == "automatic" else "unknown"
             progress = QProgressDialog("作業用GeoPackageに書込み中（取消できます）", "取消", 0, 0, self.iface.mainWindow())
-            progress.setWindowModality(_WINDOW_MODAL)
+            progress.setWindowModality(Qt.WindowModality.WindowModal)
             progress.setMinimumDuration(0)
             progress.show()
             names = write_sheets_batch(path, groups, dialog.grid_type.currentData(), "0.1.0",

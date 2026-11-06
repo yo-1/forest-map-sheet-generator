@@ -14,7 +14,7 @@ class GeneratorDialog(QDialog):
         self.target_stack = QStackedWidget()
         code_page = QWidget(); code_layout = QFormLayout(code_page); self.code = QLineEdit(); self.code.setPlaceholderText("例: 04HE / 04HE00 / 04HE1"); code_layout.addRow("図郭コード", self.code); self.target_stack.addWidget(code_page)
         self.target_stack.addWidget(QWidget())
-        polygon_page = QWidget(); polygon_layout = QFormLayout(polygon_page); self.target_layer = QgsMapLayerComboBox(); self.target_layer.setFilters(QgsMapLayerProxyModel.PolygonLayer); polygon_layout.addRow("対象レイヤ", self.target_layer); self.target_stack.addWidget(polygon_page)
+        polygon_page = QWidget(); polygon_layout = QFormLayout(polygon_page); self.target_layer = QgsMapLayerComboBox(); self.target_layer.setFilters(QgsMapLayerProxyModel.Filter.PolygonLayer); polygon_layout.addRow("対象レイヤ", self.target_layer); self.target_stack.addWidget(polygon_page)
         layout.addRow(self.target_stack)
         self.grid_type = QComboBox()
         for label, value in (("1:50,000", "50000"), ("1:5,000", "5000"), ("森林用4分割", "forest_quarter")): self.grid_type.addItem(label, value)
@@ -24,18 +24,12 @@ class GeneratorDialog(QDialog):
         self.zone_mode.currentIndexChanged.connect(self._zone_changed); layout.addRow("系の選択", self.zone_mode)
         self.zone_stack = QStackedWidget(); self.zone_stack.addWidget(QLabel("直接コードの系を使用します。"))
         manual_page = QWidget(); manual_layout = QFormLayout(manual_page); self.manual_zones = QLineEdit(); self.manual_zones.setPlaceholderText("例: 4 または 4, 5, 6"); manual_layout.addRow("系番号", self.manual_zones); self.zone_stack.addWidget(manual_page)
-        automatic_page = QWidget(); automatic_layout = QFormLayout(automatic_page); self.zone_layer = QgsMapLayerComboBox(); self.zone_layer.setFilters(QgsMapLayerProxyModel.PolygonLayer); automatic_layout.addRow("適用区域レイヤ", self.zone_layer); self.zone_stack.addWidget(automatic_page)
+        automatic_page = QWidget(); automatic_layout = QFormLayout(automatic_page); self.zone_layer = QgsMapLayerComboBox(); self.zone_layer.setFilters(QgsMapLayerProxyModel.Filter.PolygonLayer); automatic_layout.addRow("適用区域レイヤ", self.zone_layer); self.zone_stack.addWidget(automatic_page)
         layout.addRow(self.zone_stack)
         self.zone_data_version = QLineEdit(); self.zone_data_version.setPlaceholderText("例: v2026.1（不明なら空欄）"); layout.addRow("適用区域データ版", self.zone_data_version)
-        self.output = QgsFileWidget(); self.output.setFilter("GeoPackage (*.gpkg)"); self.output.setStorageMode(QgsFileWidget.SaveFile); layout.addRow("出力GeoPackage", self.output)
+        self.output = QgsFileWidget(); self.output.setFilter("GeoPackage (*.gpkg)"); self.output.setStorageMode(QgsFileWidget.StorageMode.SaveFile); layout.addRow("出力GeoPackage", self.output)
         layout.addRow(QLabel("計算中・書込み中に取消できます。既存の同名レイヤは上書きしません。"))
-        try:
-            _ok = QDialogButtonBox.StandardButton.Ok  # Qt6 scoped enum
-            _cancel = QDialogButtonBox.StandardButton.Cancel
-        except AttributeError:  # Qt5
-            _ok = QDialogButtonBox.Ok
-            _cancel = QDialogButtonBox.Cancel
-        buttons = QDialogButtonBox(_ok | _cancel); buttons.accepted.connect(self.accept); buttons.rejected.connect(self.reject); layout.addRow(buttons)
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel); buttons.accepted.connect(self.accept); buttons.rejected.connect(self.reject); layout.addRow(buttons)
         # 実機検証・UIテストが各入力を特定できるよう objectName を付与する（挙動は変えない）
         for name, widget in (
             ("forestMapSheetGeneratorDialog", self), ("targetMethodCombo", self.method), ("targetStack", self.target_stack),

@@ -55,9 +55,9 @@ def write_sheets(path, zone, grid_type, sheets, plugin_version, commit="unknown"
     options = QgsVectorFileWriter.SaveVectorOptions()
     options.driverName = "GPKG"
     options.layerName = name
-    options.actionOnExistingFile = (QgsVectorFileWriter.CreateOrOverwriteLayer if exists
-                                    else QgsVectorFileWriter.CreateOrOverwriteFile)
-    writer = QgsVectorFileWriter.create(path, fields, QgsWkbTypes.Polygon, QgsCoordinateReferenceSystem(f"EPSG:{epsg}"), QgsProject.instance().transformContext(), options)
+    options.actionOnExistingFile = (QgsVectorFileWriter.ActionOnExistingFile.CreateOrOverwriteLayer if exists
+                                    else QgsVectorFileWriter.ActionOnExistingFile.CreateOrOverwriteFile)
+    writer = QgsVectorFileWriter.create(path, fields, QgsWkbTypes.Type.Polygon, QgsCoordinateReferenceSystem(f"EPSG:{epsg}"), QgsProject.instance().transformContext(), options)
     if writer.hasError():
         raise RuntimeError(writer.errorMessage())
     from qgis.core import QgsGeometry, QgsPointXY
