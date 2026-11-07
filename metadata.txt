@@ -8,6 +8,7 @@ author=Yoichi Wada
 email=yo-1@geographic-information.net
 about=林野庁『森林情報に関するオープンデータ標準仕様書 Ver2.1（2026年8月版）』に準拠し、森林資源メッシュの作成・公開に必要となる国土基本図図郭（1:50,000、森林用4分割、1:5,000）と図郭コードを、JGD2011の平面直角座標系（1〜19系）で生成してGeoPackageへ出力します。関連プラグイン forest_mesh20m は、この図郭をファイル単位として20mメッシュを生成します。本プラグインは図郭とコードの生成専用で、DEM解析・20mメッシュ生成・森林資源量の集計は行いません。既知の未検証事項：書込みフェーズでの取消、プラグイン管理画面からのZIPインストール（確認環境の都合による）。
 category=Vector
+icon=icon.png
 hasProcessingProvider=no
 experimental=False
 deprecated=False
