@@ -1,5 +1,7 @@
 # 森林資源メッシュ用国土基本図図郭作成プラグイン
 
+<img src="forest_map_sheet_generator/icon.png" width="96" alt="plugin icon">
+
 v0.1.0。作者：Yoichi Wada。
 このリポジトリにはQGISプラグイン本体、計算試験、試験用インストールZIPの作成手順を含めます。正式版は GitHub Release の v0.1.0 です。
 
