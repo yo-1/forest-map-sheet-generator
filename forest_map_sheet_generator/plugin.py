@@ -139,7 +139,7 @@ class ForestMapSheetGeneratorPlugin:
             progress.setWindowModality(Qt.WindowModality.WindowModal)
             progress.setMinimumDuration(0)
             progress.show()
-            names = write_sheets_batch(path, groups, dialog.grid_type.currentData(), "0.1.0",
+            names = write_sheets_batch(path, groups, dialog.grid_type.currentData(), "0.1.1",
                                        commit=COMMIT, method=method, zone_data_version=version or "unknown",
                                        cancel=cancelled)
             progress.close()
