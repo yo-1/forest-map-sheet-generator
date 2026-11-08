@@ -37,10 +37,10 @@ with zipfile.ZipFile(OUT, "w", zipfile.ZIP_DEFLATED) as archive:
     for entry in ROOT_FILES:
         add_bytes(f"{PLUGIN_DIR}/{entry}", (ROOT / entry).read_bytes())
     # Keep the full commit ID in the external build record (the build argument
-    # and GitHub source commit are exact), but embed only an unambiguous 12-char
-    # prefix in the installable package. Hex strings of 20 chars were flagged
+    # and GitHub source commit are exact), but embed only the conventional 7-char
+    # short commit ID in the installable package. Longer hexadecimal prefixes were flagged
     # by the QGIS portal's detect-secrets scan, including when split in half.
-    short_commit = commit[:12] if commit != "unknown" else "unknown"
+    short_commit = commit[:7] if commit != "unknown" else "unknown"
     build_info = f"COMMIT = {short_commit!r}\n"
     add_bytes(f"{PLUGIN_DIR}/_build_info.py", build_info.encode("utf-8"))
 digest = hashlib.sha256(OUT.read_bytes()).hexdigest()
