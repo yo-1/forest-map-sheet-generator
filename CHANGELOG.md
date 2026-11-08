@@ -1,7 +1,7 @@
 # CHANGELOG
 
 ## v0.1.1 — 2026-11-08
-- Prepare the portal resubmission after the v0.1.0 detect-secrets scan flagged the embedded commit ID. The package now embeds a 12-character commit prefix; the exact full commit remains the build input and GitHub source reference.
+- Prepare the portal resubmission after the v0.1.0 detect-secrets scan flagged the embedded commit ID. The package now embeds a 7-character commit prefix; the exact full commit remains the build input and GitHub source reference.
 - Keep metadata, build ZIP name, and GeoPackage provenance version aligned at 0.1.1.
 - Add CI scanning of the built ZIP contents with detect-secrets to catch packaging regressions.
 
