@@ -1,4 +1,9 @@
-"""Run with QGIS Python. A skipped test is not a successful integration run."""
+"""Standalone QGIS Python integration tests; NOT for QGIS Desktop/Dev Probe.
+
+The test class owns a QgsApplication lifecycle. Running it inside a live
+QGIS Desktop process may interfere with the application; run in a separate
+QGIS Python process until a Desktop-safe lifecycle fixture is implemented.
+"""
 import os
 from pathlib import Path
 import sqlite3
