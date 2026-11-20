@@ -1,4 +1,9 @@
-"""Run with QGIS Python. A skipped test is not a successful integration run."""
+"""Standalone QGIS Python integration tests; NOT for QGIS Desktop/Dev Probe.
+
+The test class owns a QgsApplication lifecycle. Running it inside a live
+QGIS Desktop process may interfere with the application; run in a separate
+QGIS Python process until a Desktop-safe lifecycle fixture is implemented.
+"""
 import os
 from pathlib import Path
 import sqlite3
@@ -24,6 +29,13 @@ from forest_map_sheet_generator.qgis_adapter.zones import ZoneLayerError, automa
 class QgisIntegrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        # This unittest class owns a standalone QGIS application. Never
+        # create or shut down an application already owned by QGIS Desktop.
+        if QgsApplication.instance() is not None:
+            raise unittest.SkipTest(
+                "A Qt/QGIS application already exists; run these tests in a "
+                "fresh standalone QGIS Python process, not QGIS Desktop."
+            )
         cls.app = QgsApplication([], False)
         cls.app.initQgis()
 
