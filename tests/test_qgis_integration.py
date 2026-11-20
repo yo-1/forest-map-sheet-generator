@@ -29,6 +29,13 @@ from forest_map_sheet_generator.qgis_adapter.zones import ZoneLayerError, automa
 class QgisIntegrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        # This unittest class owns a standalone QGIS application. Never
+        # create or shut down an application already owned by QGIS Desktop.
+        if QgsApplication.instance() is not None:
+            raise unittest.SkipTest(
+                "A Qt/QGIS application already exists; run these tests in a "
+                "fresh standalone QGIS Python process, not QGIS Desktop."
+            )
         cls.app = QgsApplication([], False)
         cls.app.initQgis()
 
